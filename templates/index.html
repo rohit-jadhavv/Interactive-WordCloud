@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interactive Word Cloud</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
+  <style>
+    #word-cloud {
+      width: 800px;
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <center>
+    <div id="word-cloud"></div>
+  </center>
+  <script>
+
+    const wordData = [
+    {% for word_entry in word_data %}
+        {word: "{{ word_entry.word }}", frequency: {{ word_entry.frequency }}},
+    {% endfor %}
+    ];
+
+    console.log(wordData)
+    // Function to handle word click events
+    function handle_word_click(event) {
+      const word = event.currentTarget.textContent;
+      fetch('/process_word', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'word': word }),
+      })
+      .then(response => response.json())
+      .then(data => alert(data.message))
+      .catch(error => console.error('Error:', error));
+    }
+    function get_random_color() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+    // Create the word cloud using D3.js
+    const layout = d3.layout.cloud()
+                    .size([800, 600])
+                    .words(wordData.map(d => ({ text: d.word, size: d.frequency * 15 })))
+                    .padding(5)
+                    .rotate(() => (~~(Math.random() * 2) * 90))
+                    .font('Arial')
+                    .fontSize(d => d.size)
+                    .on('end', draw);
+
+    layout.start();
+
+    // Draw the word cloud on the SVG
+    function draw(words) {
+      d3.select('#word-cloud')
+        .append('svg')
+        .attr('width', 800)
+        .attr('height', 600)
+        .append('g')
+        .attr('transform', 'translate(400,300)')
+        .selectAll('text')
+        .data(words)
+        .enter().append('text')
+        .style('font-size', d => `${d.size}px`)
+        .style('fill', () => get_random_color()) // Set random color for each word
+        .attr('text-anchor', 'middle')
+        .attr('transform', d => `translate(${d.x}, ${d.y})rotate(${d.rotate})`)
+        .text(d => d.text)
+        .on('click', handle_word_click); // Call the handle_word_click function when a word is clicked
+    }
+  </script>
+</body>
+</html>
