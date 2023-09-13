@@ -6,14 +6,44 @@
   <script src="https://cdn.rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
   <style>
     #word-cloud {
-      width: 800px;
-      height: 600px;
+      width: 700px;
+      height: 400px;
     }
+    /* Style for the custom modal */
+    #customModal {
+        display: none;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border: 2px solid #3498db; /* Border color (blue in this example) */
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Style for the overlay background */
+    #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        }
   </style>
 </head>
 <body>
   <center>
+    <h1>Interactive Word Cloud</h1>
     <div id="word-cloud"></div>
+    <div id="overlay"></div>
+    <div id="customModal">
+        <p id="displayedWord"></p>
+        <button id="closeModal">Close</button>
+    </div>
   </center>
   <script>
 
@@ -35,9 +65,18 @@
         body: JSON.stringify({ 'word': word }),
       })
       .then(response => response.json())
-      .then(data => alert(data.message))
+      .then(data => {
+        displayedWord.textContent = data.message;
+        customModal.style.display = 'block';
+        overlay.style.display = 'block';
+      })
       .catch(error => console.error('Error:', error));
     }
+    closeModal.addEventListener('click', () => {
+      // Hide the custom modal and overlay
+      customModal.style.display = 'none';
+      overlay.style.display = 'none';
+    });
     function get_random_color() {
       const letters = '0123456789ABCDEF';
       let color = '#';

@@ -59,7 +59,7 @@ def index():
     "The adventurous explorers ventured deep into the jungle.",
     "The artist painted a masterpiece on the blank canvas.",
     "The starlit sky shone brightly on a clear night.",
-    "The astronaut floated gracefully in the zero-gravity.",
+    "The astronaut floated gracefully in the zerogravity.",
     "The delicate flower bloomed in the early spring.",
     "The detective cleverly solved the mysterious case.",
     "The crowd cheered enthusiastically at the concert.",
@@ -104,10 +104,14 @@ def index():
 def process_word():
     data = request.get_json()
     word = data.get('word')
-
+    wrdlist = []
     for i in text:
         if word in i:
-            return jsonify({'message': f'You clicked on "{i}".'})
+            wrdlist.append(i)
+        
+    messages = '\n'.join(wrdlist)
+    
+    return jsonify({'message': f'{messages}'})
 
 if __name__ == '__main__':
     app.run(debug=True)
